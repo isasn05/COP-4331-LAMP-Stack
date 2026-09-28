@@ -1,0 +1,8 @@
+# Database credentials - never commit
+api/config.php
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
