@@ -11,8 +11,8 @@ The application takes in users and allows them to log in. After logging in, user
 * MYSQL
 
 ## High-level setup instructions
-1. Create the server.
-2. Connect a domain. 
+1. Create the server - > DigitalOcean
+2. Connect a domain -> GoDaddy 
 3. Check the web server. 
 4. Set up the database. 
 5. Create the folder structure. 
