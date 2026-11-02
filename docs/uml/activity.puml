@@ -1,0 +1,60 @@
+@startuml activity
+title COLORS Web Application - Activity Diagram
+skinparam shadowing false
+skinparam ActivityBackgroundColor #E1F5EE
+skinparam ActivityBorderColor #0F6E56
+skinparam ActivityDiamondBackgroundColor #FAEEDA
+skinparam legendBackgroundColor #F1EFE8
+
+start
+:User opens login page (index.html);
+repeat
+  :User enters username and password;
+  :code.js doLogin() sends JSON {login, password} to Login.php;
+  :Login.php queries MySQL:\nSELECT ID, firstName, lastName FROM Users\nWHERE Login=? AND Password=?;
+  backward :Display "User/Password combination incorrect";
+repeat while (User record found?) is ([no]) not ([yes])
+
+:saveCookie() stores firstName, lastName, userId (20 min);
+:Redirect to color.html;
+:readCookie() runs on page load;
+if (Cookie valid (userId > 0)?) then ([no])
+  :Redirect to index.html;
+  stop
+else ([yes])
+endif
+
+repeat
+  switch (User selects action)
+  case ([search / view saved])
+    :User enters search text;
+    :searchColor() sends JSON {search, userId}\nto SearchColors.php;
+    :SearchColors.php queries MySQL:\nSELECT Name FROM Colors\nWHERE Name LIKE ? AND UserID=?;
+    if (Rows found?) then ([yes])
+      :Display matching colors;
+    else ([no])
+      :Display "No Records Found";
+    endif
+  case ([add])
+    :User enters new color name;
+    :addColor() sends JSON {color, userId}\nto AddColor.php;
+    :AddColor.php inserts into MySQL:\nINSERT INTO Colors (UserId, Name);
+    if (Request succeeded?) then ([yes])
+      :Display "Color has been added";
+    else ([no])
+      :Display error message;
+    endif
+  case ([log out])
+  endswitch
+repeat while (Log out selected?) is ([no]) not ([yes])
+
+:doLogout() expires the cookie;
+:Redirect to index.html;
+stop
+
+legend right
+  Layers: User -> Browser (code.js)
+  -> PHP API (api/*.php) -> MySQL
+  Session state is a client-side cookie only.
+endlegend
+@enduml

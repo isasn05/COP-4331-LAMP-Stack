@@ -1,0 +1,50 @@
+@startuml usecase
+title COLORS Web Application - Use Case Diagram
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #EEEDFE
+  BorderColor #534AB7
+}
+skinparam note {
+  BackgroundColor #FAEEDA
+  BorderColor #854F0B
+}
+actor "User" as user
+
+rectangle "COLORS Web Application" {
+  usecase "Log in" as UC1
+  usecase "View saved colors" as UC2
+  usecase "Search colors" as UC3
+  usecase "Add color" as UC4
+  usecase "Log out" as UC5
+  usecase "Validate credentials" as INC1
+  usecase "Validate session\n(cookie check)" as INC2
+}
+
+user --> UC1
+user --> UC2
+user --> UC3
+user --> UC4
+user --> UC5
+
+UC1 ..> INC1 : <<include>>
+UC2 ..> INC2 : <<include>>
+UC3 ..> INC2 : <<include>>
+UC4 ..> INC2 : <<include>>
+
+note right of INC1
+  Login.php checks Login and
+  Password against the Users table
+end note
+note right of INC2
+  readCookie() on color.html;
+  an invalid cookie redirects
+  to index.html
+end note
+note bottom of UC2
+  Implemented through SearchColors.php
+  using a broad search term
+end note
+@enduml

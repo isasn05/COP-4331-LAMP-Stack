@@ -1,0 +1,108 @@
+@startuml class
+title COLORS Web Application - Class Diagram (conceptual model of the procedural LAMP code)
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #F1EFE8
+  BorderColor #5F5E5A
+}
+skinparam note {
+  BackgroundColor #FAEEDA
+  BorderColor #854F0B
+}
+
+package "Front end (public/)" {
+  class ColorPage <<boundary>> {
+    color.html / index.html
+    --
+    - loginForm : login, password fields
+    - searchBox : text field + button
+    - addColorBox : text field + button
+    - logoutButton : button
+    - resultArea : search and add results
+  }
+  class ClientScript <<js module>> {
+    code.js
+    --
+    - urlBase : string
+    - userId : int
+    - firstName : string
+    - lastName : string
+    --
+    + doLogin() : void
+    + saveCookie() : void
+    + readCookie() : void
+    + doLogout() : void
+    + addColor() : void
+    + searchColor() : void
+  }
+  class CookieSession {
+    - firstName : string
+    - lastName : string
+    - userId : int
+    - expires : 20 minutes
+  }
+}
+
+package "API (api/)" {
+  class Authentication <<php script>> {
+    Login.php
+    --
+    + POST Login(login, password) : {id, firstName, lastName, error}
+    + getRequestInfo() : array
+    + sendResultInfoAsJson(obj) : void
+    + returnWithInfo(firstName, lastName, id) : void
+    + returnWithError(err) : void
+  }
+  class ColorController <<php script>> {
+    AddColor.php / SearchColors.php
+    --
+    + POST AddColor(color, userId) : {error}
+    + POST SearchColors(search, userId) : {results, error}
+    + getRequestInfo() : array
+    + sendResultInfoAsJson(obj) : void
+    + returnWithError(err) : void
+  }
+}
+
+package "Database (MySQL)" {
+  class Database <<mysqli>> {
+    - host : string
+    - user : string
+    - dbName : string
+    --
+    + prepare(sql) : statement
+    + execute() : result
+  }
+  class User <<entity / Users table>> {
+    - ID : int
+    - firstName : string
+    - lastName : string
+    - Login : string
+    - Password : string
+  }
+  class Color <<entity / Colors table>> {
+    - ID : int
+    - UserID : int
+    - Name : string
+  }
+}
+
+ColorPage ..> ClientScript : calls on click
+ClientScript "1" --> "0..1" CookieSession : writes / reads
+ClientScript ..> Authentication : POST JSON
+ClientScript ..> ColorController : POST JSON
+Authentication ..> Database : <<use>>
+ColorController ..> Database : <<use>>
+Database "1" o-- "0..*" User : stores
+Database "1" o-- "0..*" Color : stores
+User "1" -- "0..*" Color : owns >
+Authentication ..> User : <<select>>
+ColorController ..> Color : <<insert / select>>
+
+note bottom of Color
+  The repository has no class declarations.
+  Classes here stand for the actual files,
+  functions and tables in the code.
+end note
+@enduml
