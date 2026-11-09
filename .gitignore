@@ -6,3 +6,4 @@ api/config.php
 Thumbs.db
 .vscode/
 *.log
+node_modules/
