@@ -8,7 +8,7 @@ const {
   isHexColor,
   validateLoginForm,
   buildSearchPayload,
-} = require("../../js/validation");
+} = require("../../public/js/validation");
 
 describe("formatColorName", () => {
   test("trims and collapses whitespace", () => {
