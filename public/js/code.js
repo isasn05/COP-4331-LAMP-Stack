@@ -113,7 +113,7 @@ function addColor()
 	let newColor = document.getElementById("colorText").value;
 	document.getElementById("colorAddResult").innerHTML = "";
 
-	let tmp = {color:newColor,userId,userId};
+	let tmp = {color:newColor,userId:userId};
 	let jsonPayload = JSON.stringify( tmp );
 
 	let url = urlBase + '/AddColor.' + extension;
@@ -146,7 +146,7 @@ function searchColor()
 	
 	let colorList = "";
 
-	let tmp = {color:newColor,userId:userId};
+	let tmp = {search:srch,userId:userId};
 	let jsonPayload = JSON.stringify( tmp );
 	let url = urlBase + '/SearchColors.' + extension;
 	
