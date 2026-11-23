@@ -1,0 +1,78 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # Front-end unit tests: no server, no database
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run test:unit
+
+  # Integration tests: real PHP + real MySQL. Node only runs Jest.
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: COP4331
+          MYSQL_USER: TheBeast
+          MYSQL_PASSWORD: WeLoveCOP4331
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_USER: TheBeast
+      DB_PASS: WeLoveCOP4331
+      DB_NAME: COP4331
+      API_BASE: http://127.0.0.1:8000/api
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mysqli
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm install
+
+      - name: Load test schema and seed data
+        run: mysql -h 127.0.0.1 -uroot -proot COP4331 < tests/db/schema.sql
+
+      - name: Start PHP built-in server
+        run: |
+          php -S 127.0.0.1:8000 -t . > php-server.log 2>&1 &
+          for i in $(seq 1 20); do
+            curl -s -o /dev/null http://127.0.0.1:8000/ && break
+            sleep 1
+          done
+
+      - name: Run integration tests
+        run: npm run test:integration
+
+      - name: Show PHP server log on failure
+        if: failure()
+        run: cat php-server.log
