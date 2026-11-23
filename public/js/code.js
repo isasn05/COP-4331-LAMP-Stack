@@ -146,9 +146,8 @@ function searchColor()
 	
 	let colorList = "";
 
-	let tmp = {search:srch,userId:userId};
+	let tmp = {color:newColor,userId:userId};
 	let jsonPayload = JSON.stringify( tmp );
-
 	let url = urlBase + '/SearchColors.' + extension;
 	
 	let xhr = new XMLHttpRequest();
